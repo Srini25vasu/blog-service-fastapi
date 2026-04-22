@@ -1,0 +1,1 @@
+https://dev.to/devasservice/fastapi-best-practices-a-condensed-guide-with-examples-3pa5
