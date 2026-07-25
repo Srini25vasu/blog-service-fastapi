@@ -1,6 +1,7 @@
 import logging
 
 from fastapi import FastAPI
+from sqlalchemy import text
 from sqlalchemy.engine import make_url
 
 from app.api.v1 import blogs
@@ -12,6 +13,7 @@ from app.config.settings import (
     DB_POOL_SIZE,
     DB_POOL_TIMEOUT,
 )
+from app.database.session import engine
 
 app = FastAPI(title="Blog Service API", version="1.0.0")
 logger = logging.getLogger("app.startup")
@@ -29,6 +31,9 @@ def log_db_pool_settings() -> None:
         DB_POOL_RECYCLE,
         DB_POOL_PRE_PING,
     )
+    with engine.connect() as connection:
+        connection.execute(text("SELECT 1"))
+    logger.info("Database connection established successfully")
 
 # Include routers
 app.include_router(blogs.router, prefix="/api/v1", tags=["blogs"])

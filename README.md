@@ -1,32 +1,47 @@
 # blog-service-fastapi
+
 Blog service provides content for blogs, posts and comments
 
 ## PostgreSQL configuration
 
-Set the `DATABASE_URL` environment variable before running the app.
+You can configure PostgreSQL in either of these ways before running the app.
 
-Example:
+Option 1: provide the full `DATABASE_URL`.
 
 ```powershell
-$env:DATABASE_URL="postgresql+psycopg2://postgres:postgres@localhost:5432/blog_service"
+$env:DATABASE_URL="postgresql+psycopg2://postgres:postgres@localhost:5432/blog_service?options=-csearch_path%3Dblogs-python"
 ```
+
+Option 2: provide individual connection parts. This is useful when your PostgreSQL server is running in Docker and you want to keep credentials separate.
+
+```powershell
+$env:DB_USER="postgres"
+$env:DB_PASSWORD="postgres"
+$env:DB_HOST="host.docker.internal"
+$env:DB_PORT="49153"
+$env:DB_NAME="blogdb"
+$env:DB_SCHEMA="blogs-python"
+```
+
+If `DATABASE_URL` is set, it takes precedence over the individual `DB_*` variables.
+If you still have an older URL using `currentSchema=...`, the app now normalizes it automatically for psycopg2.
 
 Optional production-safe pool settings:
 
 ```powershell
-$env:DB_POOL_SIZE="10"
-$env:DB_MAX_OVERFLOW="20"
-$env:DB_POOL_TIMEOUT="30"
-$env:DB_POOL_RECYCLE="1800"
+$env:DB_POOL_SIZE="20"
+$env:DB_MAX_OVERFLOW="40"
+$env:DB_POOL_TIMEOUT="45"
+$env:DB_POOL_RECYCLE="1500"
 $env:DB_POOL_PRE_PING="true"
 ```
 
 Pool setting defaults:
 
-- `DB_POOL_SIZE=10`
-- `DB_MAX_OVERFLOW=20`
-- `DB_POOL_TIMEOUT=30`
-- `DB_POOL_RECYCLE=1800`
+- `DB_POOL_SIZE=20`
+- `DB_MAX_OVERFLOW=40`
+- `DB_POOL_TIMEOUT=45`
+- `DB_POOL_RECYCLE=1500`
 - `DB_POOL_PRE_PING=true`
 
 Create database once in PostgreSQL:
