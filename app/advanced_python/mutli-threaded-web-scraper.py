@@ -5,4 +5,9 @@
 # Das Program verwaltet mehrer Threads, um gleichzeitig Verbundingen zu verarbeiten, wodurch
 # die Datenabrufeprozess effizienter wird
 #
-#
+#https://www.w3resource.com/python-exercises/advanced/implement-a-multi-threaded-web%20scraper.php
+import requests
+from bs4 import BeautifulSoup
+from concurrent.futures import ThreadPoolExecutor
+import urllib.robotparser
+from urllib.parse import urljoin, parse
