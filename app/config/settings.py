@@ -64,6 +64,9 @@ def _build_database_url() -> str:
 DATABASE_URL = _build_database_url()
 
 
+API_V1_PREFIX = "/api/v1"
+
+
 DB_POOL_SIZE = _int_env("DB_POOL_SIZE", 20, minimum=1)
 DB_MAX_OVERFLOW = _int_env("DB_MAX_OVERFLOW", 40, minimum=0)
 DB_POOL_TIMEOUT = _int_env("DB_POOL_TIMEOUT", 45, minimum=1)
@@ -71,6 +74,24 @@ DB_POOL_RECYCLE = _int_env("DB_POOL_RECYCLE", 1500, minimum=30)
 DB_POOL_PRE_PING = os.getenv("DB_POOL_PRE_PING", "true").lower() == "true"
 
 
-JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", "change-me-in-production")
+APP_ENV = os.getenv("APP_ENV", "development").lower()
+
+DEFAULT_JWT_SECRET_KEY = "change-me-in-production"
+JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", DEFAULT_JWT_SECRET_KEY)
 JWT_ALGORITHM = os.getenv("JWT_ALGORITHM", "HS256")
 ACCESS_TOKEN_EXPIRE_MINUTES = _int_env("ACCESS_TOKEN_EXPIRE_MINUTES", 30, minimum=1)
+
+
+def check_jwt_secret_key() -> str | None:
+    """Return a warning if ``JWT_SECRET_KEY`` is unsafe, or raise in production.
+
+    Raises:
+        RuntimeError: If ``APP_ENV=production`` and the default key is in use.
+    """
+    if JWT_SECRET_KEY == DEFAULT_JWT_SECRET_KEY:
+        if APP_ENV == "production":
+            raise RuntimeError("JWT_SECRET_KEY must be set when APP_ENV=production")
+        return "JWT_SECRET_KEY is the public default; anyone can forge access tokens. Set it before deploying."
+    if len(JWT_SECRET_KEY.encode("utf-8")) < 32:
+        return "JWT_SECRET_KEY is shorter than 32 bytes, the recommended minimum for HS256."
+    return None
