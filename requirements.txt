@@ -11,3 +11,7 @@ bs4
 #Testing
 pytest
 httpx
+#Auth
+PyJWT
+bcrypt
+python-multipart
