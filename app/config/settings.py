@@ -69,3 +69,8 @@ DB_MAX_OVERFLOW = _int_env("DB_MAX_OVERFLOW", 40, minimum=0)
 DB_POOL_TIMEOUT = _int_env("DB_POOL_TIMEOUT", 45, minimum=1)
 DB_POOL_RECYCLE = _int_env("DB_POOL_RECYCLE", 1500, minimum=30)
 DB_POOL_PRE_PING = os.getenv("DB_POOL_PRE_PING", "true").lower() == "true"
+
+
+JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", "change-me-in-production")
+JWT_ALGORITHM = os.getenv("JWT_ALGORITHM", "HS256")
+ACCESS_TOKEN_EXPIRE_MINUTES = _int_env("ACCESS_TOKEN_EXPIRE_MINUTES", 30, minimum=1)
