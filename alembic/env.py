@@ -10,7 +10,7 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 from app.config.settings import DATABASE_URL
-from app.database.models import BlogModel
+from app.database.models import BlogModel, UserModel
 from app.database.session import Base
 
 config = context.config
