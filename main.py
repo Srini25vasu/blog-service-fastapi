@@ -4,7 +4,7 @@ from fastapi import FastAPI
 from sqlalchemy import text
 from sqlalchemy.engine import make_url
 
-from app.api.v1 import blogs
+from app.api.v1 import auth, blogs
 from app.config.settings import (
     DATABASE_URL,
     DB_MAX_OVERFLOW,
@@ -37,6 +37,7 @@ def log_db_pool_settings() -> None:
 
 # Include routers
 app.include_router(blogs.router, prefix="/api/v1", tags=["blogs"])
+app.include_router(auth.router, prefix="/api/v1", tags=["auth"])
 
 if __name__ == "__main__":
     import uvicorn
