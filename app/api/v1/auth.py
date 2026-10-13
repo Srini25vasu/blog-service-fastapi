@@ -10,6 +10,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 
+from app.config.settings import API_V1_PREFIX
 from app.database.models import UserModel
 from app.database.session import get_db
 from app.models.user import Token, User, UserCreate
@@ -18,7 +19,7 @@ from app.services.auth_service import AuthService, InvalidCredentialsError, User
 
 router = APIRouter()
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/token")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl=f"{API_V1_PREFIX}/auth/token")
 
 
 def get_auth_service(db: Session = Depends(get_db)) -> AuthService:

@@ -5,6 +5,10 @@ Routes call the service; the service talks to the database only through
 into HTTP responses by the API layer.
 """
 
+from functools import lru_cache
+
+from sqlalchemy.exc import IntegrityError
+
 from app.core.security import (
     InvalidTokenError,
     create_access_token,
@@ -29,6 +33,12 @@ class InvalidCredentialsError(Exception):
     """Raised when credentials or an access token cannot be verified."""
 
 
+@lru_cache(maxsize=1)
+def _dummy_password_hash() -> str:
+    """Hash checked for unknown users so login timing does not reveal usernames."""
+    return hash_password("dummy-password-for-timing-equalization")
+
+
 class AuthService:
     """Use cases for registering users, logging in and resolving tokens."""
 
@@ -50,11 +60,17 @@ class AuthService:
             raise UserAlreadyExistsError("username")
         if self.repository.get_by_email(payload.email) is not None:
             raise UserAlreadyExistsError("email")
-        return self.repository.create_user(
-            username=payload.username,
-            email=payload.email,
-            hashed_password=hash_password(payload.password),
-        )
+        try:
+            return self.repository.create_user(
+                username=payload.username,
+                email=payload.email,
+                hashed_password=hash_password(payload.password),
+            )
+        except IntegrityError as exc:
+            # A concurrent registration won the race between the checks above
+            # and the insert; the unique constraint names the clashing column.
+            field = "email" if "email" in str(exc.orig).lower() else "username"
+            raise UserAlreadyExistsError(field) from exc
 
     def authenticate(self, username: str, password: str) -> UserModel:
         """Return the active user matching the credentials.
@@ -63,7 +79,11 @@ class AuthService:
             InvalidCredentialsError: If the user is unknown, inactive or the password is wrong.
         """
         user = self.repository.get_by_username(username)
-        if user is None or not user.is_active or not verify_password(password, user.hashed_password):
+        if user is None:
+            # Still run bcrypt so unknown usernames take as long as known ones.
+            verify_password(password, _dummy_password_hash())
+            raise InvalidCredentialsError()
+        if not verify_password(password, user.hashed_password) or not user.is_active:
             raise InvalidCredentialsError()
         return user
 

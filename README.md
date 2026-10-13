@@ -74,7 +74,7 @@ bearer token, which is sent as `Authorization: Bearer <token>`.
 
 Endpoints:
 
-- `POST /api/v1/auth/register` - create a user (JSON body: `username`, `email`, `password` with 8-72 characters); `201`, or `409` if the username or email is taken
+- `POST /api/v1/auth/register` - create a user (JSON body: `username`, a valid `email`, `password` with at least 8 characters and at most 72 bytes in UTF-8); `201`, `409` if the username or email is taken, or `422` if validation fails
 - `POST /api/v1/auth/token` - log in with form data (`username`, `password`); returns `{"access_token": "...", "token_type": "bearer"}`, or `401`
 - `GET /api/v1/auth/me` - return the authenticated user; `401` without a valid token
 
@@ -86,8 +86,12 @@ $env:JWT_ALGORITHM="HS256"
 $env:ACCESS_TOKEN_EXPIRE_MINUTES="30"
 ```
 
-Defaults: `JWT_SECRET_KEY=change-me-in-production` (always override it in production),
-`JWT_ALGORITHM=HS256`, `ACCESS_TOKEN_EXPIRE_MINUTES=30`.
+Defaults: `JWT_SECRET_KEY=change-me-in-production`, `JWT_ALGORITHM=HS256`,
+`ACCESS_TOKEN_EXPIRE_MINUTES=30`, `APP_ENV=development`.
+
+Always set `JWT_SECRET_KEY` to a random value of at least 32 bytes outside local development.
+At startup the app logs a warning if the key is still the default or shorter than 32 bytes, and
+refuses to start if the key is the default and `APP_ENV=production`.
 
 Example:
 

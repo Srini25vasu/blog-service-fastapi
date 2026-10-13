@@ -1,3 +1,4 @@
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.database.models import UserModel
@@ -19,6 +20,10 @@ class UserRepository:
     def create_user(self, username: str, email: str, hashed_password: str) -> UserModel:
         user = UserModel(username=username, email=email, hashed_password=hashed_password, is_active=True)
         self.db.add(user)
-        self.db.commit()
+        try:
+            self.db.commit()
+        except IntegrityError:
+            self.db.rollback()
+            raise
         self.db.refresh(user)
         return user

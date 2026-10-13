@@ -48,3 +48,21 @@ def test_token_defaults_to_bearer_type():
     token = Token(access_token="abc")
 
     assert token.token_type == "bearer"
+
+
+def test_user_create_rejects_password_over_72_utf8_bytes():
+    # 30 characters, but 120 bytes in UTF-8: bcrypt would reject or truncate it.
+    with pytest.raises(ValidationError):
+        UserCreate(username="alice", email="alice@example.com", password="ü😀" * 15)
+
+
+def test_user_create_accepts_multibyte_password_within_72_bytes():
+    payload = UserCreate(username="alice", email="alice@example.com", password="ü" * 36)
+
+    assert payload.password == "ü" * 36
+
+
+@pytest.mark.parametrize("email", ["abc", "alice@", "@example.com", "alice example.com"])
+def test_user_create_rejects_invalid_email(email):
+    with pytest.raises(ValidationError):
+        UserCreate(username="alice", email=email, password="s3cretpass")
