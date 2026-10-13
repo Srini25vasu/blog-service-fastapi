@@ -8,3 +8,6 @@ alembic
 #Web scraping
 requests
 bs4
+#Testing
+pytest
+httpx

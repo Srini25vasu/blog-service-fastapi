@@ -53,6 +53,7 @@ CREATE DATABASE blog_service;
 The blogs endpoints now persist to PostgreSQL:
 
 - `GET /api/v1/blogs`
+- `GET /api/v1/blogs/{blog_id}`
 - `POST /api/v1/blogs`
 - `PUT /api/v1/blogs/{blog_id}`
 - `DELETE /api/v1/blogs/{blog_id}`
@@ -82,4 +83,12 @@ Rollback one migration:
 
 ```powershell
 alembic -c alembic.ini downgrade -1
+```
+
+## Tests
+
+Unit tests use mocks and need no database:
+
+```powershell
+python -m pytest
 ```
